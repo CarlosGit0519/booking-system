@@ -68,6 +68,10 @@ docker compose up --build
 
 This starts PostgreSQL and the API. The API container applies the committed Prisma migrations before starting.
 
+## Deployment
+
+The repository includes `render.yaml`, a Render Blueprint that creates the web service and PostgreSQL database together. The deployed Swagger documentation is available at `/docs`.
+
 ## Main endpoints
 
 | Method | Endpoint | Access | Purpose |
