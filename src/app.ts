@@ -1,5 +1,7 @@
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 
+import { openApiSpecification } from './docs/openapi.js';
 import { errorHandler } from './middlewares/error-handler.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { bookingRouter } from './modules/bookings/booking.routes.js';
@@ -13,6 +15,8 @@ app.use(express.json());
 app.get('/health', (_request, response) => {
   response.status(200).json({ status: 'ok' });
 });
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiSpecification));
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/bookings', bookingRouter);
