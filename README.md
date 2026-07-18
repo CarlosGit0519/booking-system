@@ -96,6 +96,6 @@ docker compose up -d
 
 ## Project status
 
-Core API complete. Next steps include automated tests, Dockerising the API service, CI/CD and public deployment.
+Core API complete with automated booking-rule tests and continuous integration. Next steps include Dockerising the API service and public deployment.
 
 See the [project specification](docs/project-specification.md) for the original scope.

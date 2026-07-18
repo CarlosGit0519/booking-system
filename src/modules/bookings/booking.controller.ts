@@ -3,17 +3,8 @@ import { z } from 'zod';
 
 import { AppError } from '../../errors/app-error.js';
 import { prisma } from '../../lib/prisma.js';
+import { isWithinWorkingHours } from './booking.rules.js';
 import { cancelBookingSchema, createBookingSchema } from './booking.schemas.js';
-
-function getMinutesSinceMidnight(date: Date): number {
-  return date.getUTCHours() * 60 + date.getUTCMinutes();
-}
-
-function getMinutesFromTime(value: string): number {
-  const hours = Number(value.slice(0, 2));
-  const minutes = Number(value.slice(3, 5));
-  return hours * 60 + minutes;
-}
 
 export async function createBooking(request: Request, response: Response): Promise<void> {
   const input = createBookingSchema.parse(request.body);
@@ -53,15 +44,7 @@ export async function createBooking(request: Request, response: Response): Promi
         },
       });
 
-      const startMinutes = getMinutesSinceMidnight(input.startAt);
-      const endMinutes = getMinutesSinceMidnight(endAt);
-
-      if (
-        !schedule ||
-        endAt.getUTCDate() !== input.startAt.getUTCDate() ||
-        startMinutes < getMinutesFromTime(schedule.startTime) ||
-        endMinutes > getMinutesFromTime(schedule.endTime)
-      ) {
+      if (!isWithinWorkingHours(input.startAt, endAt, schedule)) {
         throw new AppError('The selected time is outside the staff working hours.', 400);
       }
 
