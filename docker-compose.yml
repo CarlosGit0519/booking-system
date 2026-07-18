@@ -15,5 +15,21 @@ services:
       timeout: 5s
       retries: 5
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: "postgresql://booking_user:booking_password@postgres:5432/booking_db?schema=public"
+      JWT_SECRET: "change-this-development-secret-before-deploying"
+      JWT_EXPIRES_IN: "1d"
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres-data:

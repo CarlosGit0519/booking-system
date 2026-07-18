@@ -60,6 +60,14 @@ npm run dev
 
 The API starts at `http://localhost:3002`.
 
+### Run the full stack with Docker
+
+```powershell
+docker compose up --build
+```
+
+This starts PostgreSQL and the API. The API container applies the committed Prisma migrations before starting.
+
 ## Main endpoints
 
 | Method | Endpoint | Access | Purpose |
