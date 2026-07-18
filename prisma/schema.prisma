@@ -1,0 +1,89 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id               String    @id @default(cuid())
+  name             String
+  email            String    @unique
+  passwordHash     String
+  role             Role      @default(CUSTOMER)
+  staffProfile     StaffProfile?
+  customerBookings Booking[] @relation("CustomerBookings")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Service {
+  id              String    @id @default(cuid())
+  name            String
+  description     String?
+  durationMinutes Int
+  price           Decimal   @db.Decimal(10, 2)
+  isActive        Boolean   @default(true)
+  bookings        Booking[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model StaffProfile {
+  id        String            @id @default(cuid())
+  userId    String            @unique
+  user      User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  isActive  Boolean           @default(true)
+  schedules WorkingSchedule[]
+  bookings  Booking[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model WorkingSchedule {
+  id             String       @id @default(cuid())
+  staffProfileId String
+  staffProfile   StaffProfile @relation(fields: [staffProfileId], references: [id], onDelete: Cascade)
+  dayOfWeek      Int
+  startTime      String
+  endTime        String
+
+  @@unique([staffProfileId, dayOfWeek])
+}
+
+model Booking {
+  id                 String        @id @default(cuid())
+  customerId         String
+  customer           User          @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Restrict)
+  staffProfileId     String
+  staffProfile       StaffProfile  @relation(fields: [staffProfileId], references: [id], onDelete: Restrict)
+  serviceId          String
+  service            Service       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  startAt            DateTime
+  endAt              DateTime
+  status             BookingStatus @default(PENDING)
+  cancellationReason String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([staffProfileId, startAt])
+  @@index([customerId, startAt])
+  @@index([serviceId])
+}
