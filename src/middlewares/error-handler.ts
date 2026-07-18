@@ -36,6 +36,18 @@ export const errorHandler: ErrorRequestHandler = (error, _request, response, _ne
     return;
   }
 
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === 'P2034'
+  ) {
+    response.status(409).json({
+      error: { message: 'Booking conflict. Please try another time.' },
+    });
+    return;
+  }
+
   console.error(error);
   response.status(500).json({
     error: { message: 'Internal server error.' },
