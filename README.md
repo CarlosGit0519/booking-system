@@ -70,7 +70,7 @@ This starts PostgreSQL and the API. The API container applies the committed Pris
 
 ## Deployment
 
-The repository includes `render.yaml`, a Render Blueprint that creates the web service and PostgreSQL database together. The deployed Swagger documentation is available at `/docs`.
+The repository includes `render.yaml`, a Render Blueprint for deployment on Render. It reuses the workspace PostgreSQL instance but stores this project in a separate `booking` schema, so it does not share tables with other projects. The deployed Swagger documentation is available at `/docs`.
 
 ## Main endpoints
 
