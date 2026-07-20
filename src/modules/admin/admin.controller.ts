@@ -1,10 +1,15 @@
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 
+import { AppError } from '../../errors/app-error.js';
 import { prisma } from '../../lib/prisma.js';
 
 const bookingsQuerySchema = z.object({
   status: z.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']).optional(),
+});
+
+const updateBookingStatusSchema = z.object({
+  status: z.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']),
 });
 
 export async function getDashboard(_request: Request, response: Response): Promise<void> {
@@ -56,4 +61,25 @@ export async function listServices(_request: Request, response: Response): Promi
   });
 
   response.status(200).json({ data: { services } });
+}
+
+export async function updateBookingStatus(request: Request, response: Response): Promise<void> {
+  const bookingId = z.string().cuid().parse(request.params.bookingId);
+  const input = updateBookingStatusSchema.parse(request.body);
+  const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+
+  if (!booking) {
+    throw new AppError('Booking not found.', 404);
+  }
+
+  if (booking.status === 'CANCELLED' || booking.status === 'COMPLETED') {
+    throw new AppError('A cancelled or completed booking cannot be changed.', 400);
+  }
+
+  const updatedBooking = await prisma.booking.update({
+    where: { id: booking.id },
+    data: { status: input.status },
+  });
+
+  response.status(200).json({ data: { booking: updatedBooking } });
 }
